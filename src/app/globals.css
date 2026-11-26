@@ -1,0 +1,112 @@
+:root {
+  /* Palette */
+  --ink: #1e1c1a;
+  --ink-deep: #1b1a18;
+  --ink-shadow: 17, 16, 15;
+  --paper: #efece7;
+  --paper-light: #f7f5f1;
+  --paper-muted: #e5e0d8;
+  --line: #ddd7ce;
+  --line-strong: #cfc8bc;
+  --cream: #f4f1ec;
+  --cream-soft: #e9e3d8;
+  --gold: #c9a56a;
+  --gold-light: #e2c48e;
+  --gold-text: #b08a4e;
+  --bronze: #7a5c2b;
+  --text-soft: #3a3732;
+  --text-muted: #4a4640;
+  --text-faint: #5e5a53;
+  --text-subtle: #6b665e;
+  --success-bg: #ddf3e5;
+  --success-fg: #1d6b44;
+  --danger-bg: #f6e0de;
+  --danger-fg: #9a2e25;
+  --warning-bg: #fbefd9;
+  --warning-fg: #7a4e0b;
+
+  /* Fonts (set by next/font in layout.tsx) */
+  --script: var(--font-script), cursive;
+  --sans: var(--font-sans), system-ui, sans-serif;
+  --serif: var(--font-serif), Georgia, serif;
+  --verse-font: var(--font-verse), Georgia, serif;
+
+  /* Mobile-first column width used by every section */
+  --column: 440px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--ink-deep);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--bronze);
+}
+
+a:hover {
+  color: #5a4320;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-text);
+  outline-offset: 2px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8a857d;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
