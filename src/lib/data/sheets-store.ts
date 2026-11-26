@@ -51,6 +51,16 @@ function parseTableNumber(value: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/** True when the spreadsheet locale writes 1.5 as "1,5"; such locales use ";" between formula arguments. */
+function usesDecimalComma(locale: string | null | undefined): boolean {
+  if (!locale) return false;
+  try {
+    return new Intl.NumberFormat(locale.replace("_", "-")).format(1.5).includes(",");
+  } catch {
+    return false;
+  }
+}
+
 const cell = (row: string[], i: number) => (row[i] ?? "").toString().trim();
 
 interface GuestRow {
@@ -71,6 +81,8 @@ export class SheetsStore implements WeddingStore {
   private spreadsheetId: string;
   private sheetIds = new Map<string, number>();
   private ready: Promise<void> | null = null;
+  /** Formula argument separator: "," for en-US-style locales, ";" where "," is the decimal mark (e.g. pt_PT). */
+  private argSeparator = ",";
 
   constructor(options: { spreadsheetId: string; clientEmail: string; privateKey: string }) {
     const client = new auth.GoogleAuth({
@@ -84,21 +96,47 @@ export class SheetsStore implements WeddingStore {
   // ---------------------------------------------------------------- schema
 
   private ensureSchema(): Promise<void> {
-    this.ready ??= this.createMissingSheets().catch((error) => {
+    this.ready ??= this.setUpSheets().catch((error) => {
       this.ready = null;
       throw error;
     });
     return this.ready;
   }
 
-  private async createMissingSheets() {
-    const meta = await this.api.spreadsheets.get({ spreadsheetId: this.spreadsheetId, fields: "sheets.properties" });
+  private async setUpSheets() {
+    const meta = await this.api.spreadsheets.get({
+      spreadsheetId: this.spreadsheetId,
+      fields: "properties.locale,sheets.properties",
+    });
     for (const s of meta.data.sheets ?? []) {
       if (s.properties?.title != null && s.properties.sheetId != null) {
         this.sheetIds.set(s.properties.title, s.properties.sheetId);
       }
     }
+    this.argSeparator = usesDecimalComma(meta.data.properties?.locale) ? ";" : ",";
 
+    await this.createMissingSheets();
+    await this.refreshTableFormulas();
+  }
+
+  /** Rewrites the "Mesas" formula columns so they match the sheet's locale (and repairs broken ones). */
+  private async refreshTableFormulas() {
+    const res = await this.api.spreadsheets.values.get({ spreadsheetId: this.spreadsheetId, range: `${SHEET.tables}!A2:A` });
+    const data = (res.data.values ?? [])
+      .map((row, i) => ({ number: parseTableNumber(cell(row as string[], 0)), rowNumber: i + 2 }))
+      .filter((r): r is { number: number; rowNumber: number } => r.number !== null)
+      .map(({ number, rowNumber }) => ({
+        range: `${SHEET.tables}!D${rowNumber}:E${rowNumber}`,
+        values: [this.tableRow(number, "", 0).slice(3)],
+      }));
+    if (data.length === 0) return;
+    await this.api.spreadsheets.values.batchUpdate({
+      spreadsheetId: this.spreadsheetId,
+      requestBody: { valueInputOption: "USER_ENTERED", data },
+    });
+  }
+
+  private async createMissingSheets() {
     const missing = (Object.keys(SHEET) as (keyof typeof SHEET)[]).filter((k) => !this.sheetIds.has(SHEET[k]));
     if (missing.length === 0) return;
 
@@ -348,13 +386,15 @@ export class SheetsStore implements WeddingStore {
   /** Row for the "Mesas" tab; the last two columns are live formulas over "Convidados". */
   private tableRow(number: number, name: string, capacity: number): (string | number)[] {
     const g = SHEET.guests;
-    const seated = `'${g}'!E:E,${number},'${g}'!I:I,"<>Não vem"`;
+    const s = this.argSeparator;
+    const seated = [`'${g}'!E:E`, number, `'${g}'!I:I`, `"<>Não vem"`].join(s);
+    const names = [`'${g}'!C:C`, `'${g}'!E:E&""="${number}"`, `'${g}'!I:I<>"Não vem"`].join(s);
     return [
       number,
       name,
       capacity,
       `=COUNTIFS(${seated})`,
-      `=IFERROR(TEXTJOIN(", ",TRUE,FILTER('${g}'!C:C,'${g}'!E:E=${number},'${g}'!I:I<>"Não vem")),"")`,
+      `=IFERROR(TEXTJOIN(", "${s}TRUE${s}FILTER(${names}))${s}"")`,
     ];
   }
 
