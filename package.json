@@ -2,19 +2,16 @@
   "name": "marriage-invitation",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev:invitation": "npm run dev --workspace=@wedding/invitation",
+    "dev:admin": "npm run dev --workspace=@wedding/admin",
+    "build": "npm run build --workspaces --if-present",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@googleapis/sheets": "^18.1.3",
-    "next": "^16.4.6",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "server-only": "^0.0.1"
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@types/node": "^26.6.11",

@@ -1,0 +1,174 @@
+/* Spreadsheet overview ("Folha Excel sincronizada" in the design). Wider than the mobile panel. */
+
+.wrap {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1200px, calc(100vw - 32px));
+  margin: 24px 0;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  min-height: 560px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: var(--font-table), Inter, system-ui, sans-serif;
+  color: #1f1f1f;
+}
+
+.bar {
+  min-height: 56px;
+  padding: 10px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  background: #1d6b44;
+  color: #fff;
+}
+
+.fileName {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+}
+
+a.sync:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.syncDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9be3b8;
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 600;
+  background: #f3f3f3;
+}
+
+.rowNumber {
+  width: 40px;
+  text-align: center !important;
+  color: #666;
+  background: #f8f8f8;
+}
+
+.num {
+  text-align: right !important;
+}
+
+.muted {
+  color: #444;
+}
+
+.strong {
+  font-weight: 500;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.link {
+  color: #1d6b44;
+  text-decoration: underline;
+}
+
+.wrapText {
+  white-space: normal !important;
+  min-width: 220px;
+}
+
+.chip {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chipYes { background: #ddf3e5; color: #1d6b44; }
+.chipNo { background: #f6e0de; color: #9a2e25; }
+.chipPending { background: #eeeeee; color: #555; }
+.chipReserved { background: #fbefd9; color: #7a4e0b; }
+
+.totalRow td {
+  font-weight: 600;
+  background: #f3f3f3;
+}
+
+.over {
+  color: #9a2e25;
+  font-weight: 600;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: #666;
+}
+
+.tabs {
+  height: 44px;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 0 12px;
+  background: #f3f3f3;
+  border-top: 1px solid #d9d9d9;
+  overflow-x: auto;
+}
+
+.tab {
+  min-width: 120px;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font: 600 13px var(--font-table), Inter, system-ui, sans-serif;
+  color: #1f1f1f;
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: #1d6b44;
+  background: #fff;
+}

@@ -1,0 +1,7 @@
+# Never upload secrets or local build output to Vercel.
+.env
+.env*.local
+service-account*.json
+.claude
+**/node_modules
+**/.next
