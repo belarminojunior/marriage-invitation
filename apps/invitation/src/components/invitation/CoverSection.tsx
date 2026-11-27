@@ -1,17 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { wedding } from "@wedding/core/wedding";
+import { splitLines, type EventSettings } from "@wedding/core/event";
+import { weddingWeekday } from "@wedding/core/wedding-date";
 import { ChevronDown, ImageIcon, MusicIcon, PauseIcon, PlayIcon } from "@wedding/core/icons";
 import styles from "./invitation.module.css";
 
 interface CoverSectionProps {
+  event: EventSettings;
   guestLabel: string | null;
   dateLabel: string;
 }
 
 /** 1 · Cover with the couple's photo and the floating music player. */
-export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
+export function CoverSection({ event, guestLabel, dateLabel }: CoverSectionProps) {
+  const brideParents = splitLines(event.brideParents);
+  const groomParents = splitLines(event.groomParents);
+  const hasParents = brideParents.length > 0 || groomParents.length > 0;
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -56,9 +61,9 @@ export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
 
   return (
     <section className={styles.cover} aria-label="Capa do convite">
-      {wedding.coverPhoto ? (
+      {event.coverPhotoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img className={styles.coverPhoto} src={wedding.coverPhoto} alt={`${wedding.bride} e ${wedding.groom}`} />
+        <img className={styles.coverPhoto} src={event.coverPhotoUrl} alt={`${event.bride} e ${event.groom}`} />
       ) : (
         <div className={styles.coverPlaceholder}>
           <div className={styles.coverPlaceholderLabel}>
@@ -69,7 +74,8 @@ export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
       )}
       <div className={styles.coverShade} />
 
-      <audio ref={audioRef} src={wedding.song.src} loop preload="none" />
+      {event.songUrl && <audio ref={audioRef} src={event.songUrl} loop preload="none" />}
+      {event.songUrl && (
       <div className={styles.player}>
         <div className={styles.playerDisc}>
           <MusicIcon size={18} />
@@ -77,8 +83,8 @@ export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
         <div className={styles.playerInfo}>
           <div className={styles.playerRow}>
             <div className={styles.playerText}>
-              <span className={styles.playerTitle}>{wedding.song.title}</span>
-              <span className={styles.playerArtist}>{wedding.song.artist}</span>
+              <span className={styles.playerTitle}>{event.songTitle}</span>
+              <span className={styles.playerArtist}>{event.songArtist}</span>
             </div>
             <div className={`${styles.eq} ${playing ? styles.eqOn : ""}`} aria-hidden="true">
               <span /><span /><span /><span />
@@ -97,6 +103,7 @@ export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
           {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
       </div>
+      )}
 
       <div className={styles.coverContent}>
         {guestLabel && <p className={styles.coverFor}>Para {guestLabel}</p>}
@@ -104,32 +111,40 @@ export function CoverSection({ guestLabel, dateLabel }: CoverSectionProps) {
           Vamos casar-nos
         </p>
         <h1 className={styles.coverNames}>
-          {wedding.bride}
+          {event.bride}
           <br />
           <span className={styles.coverAmp}>&amp;</span>
           <br />
-          {wedding.groom}
+          {event.groom}
         </h1>
         <div className={styles.coverMeta}>
-          <span>{wedding.weekdayLabel}</span>
+          <span>{weddingWeekday(event.date)}</span>
           <span className={styles.dot} />
           <span className={styles.coverDate}>{dateLabel}</span>
           <span className={styles.dot} />
-          <span>{wedding.cityLabel}</span>
+          <span>{event.city}</span>
         </div>
-        <div className={styles.parents}>
-          <span className={styles.parentsLabel}>Com a bênção dos pais</span>
-          <div className={styles.parentsGrid}>
-            <p>
-              {wedding.parents.bride[0]}
-              <br />&amp; {wedding.parents.bride[1]}
-            </p>
-            <p>
-              {wedding.parents.groom[0]}
-              <br />&amp; {wedding.parents.groom[1]}
-            </p>
+        {hasParents && (
+          <div className={styles.parents}>
+            <span className={styles.parentsLabel}>Com a bênção dos pais</span>
+            <div className={styles.parentsGrid}>
+              {[brideParents, groomParents].map((names, i) => (
+                <p key={i}>
+                  {names.map((name, j) => (
+                    <span key={j}>
+                      {j > 0 && (
+                        <>
+                          <br />&amp;{" "}
+                        </>
+                      )}
+                      {name}
+                    </span>
+                  ))}
+                </p>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <button type="button" className={styles.openButton} onClick={openInvitation}>
           Abrir convite
           <ChevronDown size={16} strokeWidth={1.6} />

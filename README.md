@@ -29,7 +29,8 @@ gift reservations only work from a personal link. Opening a personal link record
 
 - **Convidados**: create invites (and their personal links), assign tables, copy the link or send it by WhatsApp, filter by status
 - **Mesas**: rename tables, change seats, seat or unseat invites
-- **Presentes**: add, release or remove gifts and see who reserved what
+- **Presentes**: show or hide the gift list on the invitation; add, rename, release or remove gifts
+- **Evento**: all the event details and the photos and music shown on the invitation
 - **Folha**: a spreadsheet-style overview of everything (people, gifts, tables) with a link to the real Google Sheet
 
 Guest-facing text is in Portuguese, as in the design. All code is in English.
@@ -94,11 +95,15 @@ Removing an e-mail from `ADMIN_EMAILS` signs that person out.
 
 ## Personalising
 
-Edit [`packages/core/src/wedding.ts`](packages/core/src/wedding.ts) for names, date, venue, parents, schedule,
-M-Pesa number, etc. Put files in `apps/invitation/public/`:
+Everything guests see is filled in on the admin app's **Evento** screen: names, parents, date and time,
+venue and map, invitation text, programme, verse, cover photo, song, gallery photos, and whether the
+**gift list** is visible. It is saved in the sheet's `Evento` tab (one row per field) and the invitation
+reads it on every visit. [`packages/core/src/wedding.ts`](packages/core/src/wedding.ts) only holds the
+first defaults.
 
-- `apps/invitation/public/music/our-song.mp3`: the song for the player
-- `apps/invitation/public/photos/…`: then set `coverPhoto` and `gallery.photos` in the config
+Photos and the song are uploaded from the admin app to **Vercel Blob** (`BLOB_READ_WRITE_TOKEN`, set
+automatically when the Blob store is connected to the admin project). Photos are resized in the browser
+before upload. Without the token the upload buttons are disabled.
 
 ## Deploying (Vercel)
 

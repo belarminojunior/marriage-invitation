@@ -12,6 +12,7 @@ const TABS = [
   { href: "/tables", label: "Mesas" },
   { href: "/gifts", label: "Presentes" },
   { href: "/sheet", label: "Folha" },
+  { href: "/event", label: "Evento" },
 ];
 
 export function HostTabBar() {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { coupleNames } from "@wedding/core/wedding";
 import type { SheetOverviewData } from "./types";
 import styles from "./sheet.module.css";
 
@@ -20,7 +19,15 @@ const ATTENDANCE = {
 } as const;
 
 /** Read-only spreadsheet view of the same data as the Google Sheet, with tabs at the bottom like the sheet. */
-export function SheetOverview({ data, sheetUrl }: { data: SheetOverviewData; sheetUrl: string | null }) {
+export function SheetOverview({
+  data,
+  sheetUrl,
+  coupleNames,
+}: {
+  data: SheetOverviewData;
+  sheetUrl: string | null;
+  coupleNames: string;
+}) {
   const [tab, setTab] = useState<Tab>("people");
   const going = data.people.filter((p) => p.attendance === "yes").length;
   const notGoing = data.people.filter((p) => p.attendance === "no").length;

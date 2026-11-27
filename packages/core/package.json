@@ -6,6 +6,7 @@
   "exports": {
     "./wedding": "./src/wedding.ts",
     "./wedding-date": "./src/wedding-date.ts",
+    "./event": "./src/event.ts",
     "./site": "./src/site.ts",
     "./host-auth": "./src/host-auth.ts",
     "./env": "./src/env.ts",

@@ -2,7 +2,6 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { submitRsvp } from "@/app/actions/guest";
-import { wedding } from "@wedding/core/wedding";
 import { CheckIcon, ChevronRight, GiftIcon, HeartOutline } from "@wedding/core/icons";
 import { joinNames } from "@wedding/core/data/invite-helpers";
 import type { Attendance } from "@wedding/core/data/types";
@@ -12,19 +11,21 @@ import styles from "./invitation.module.css";
 interface RsvpSectionProps {
   invite: GuestInvite | null;
   weddingDayLabel: string;
+  deadline: string;
+  giftsEnabled: boolean;
 }
 
 /** 5 · RSVP: one yes/no per person of the invite, plus an optional message. */
-export function RsvpSection({ invite, weddingDayLabel }: RsvpSectionProps) {
+export function RsvpSection({ invite, weddingDayLabel, deadline, giftsEnabled }: RsvpSectionProps) {
   return (
     <section id="rsvp" className={`${styles.section} ${styles.glowTopLeft}`}>
       <div className={`${styles.column} ${styles.rsvp}`}>
         <div className={styles.rsvpHeader}>
           <h2 className={styles.scriptTitle}>Contamos consigo?</h2>
-          <p className={styles.deadline}>{wedding.rsvpDeadlineLabel}</p>
+          {deadline && <p className={styles.deadline}>{deadline}</p>}
         </div>
         {invite ? (
-          <RsvpForm invite={invite} weddingDayLabel={weddingDayLabel} />
+          <RsvpForm invite={invite} weddingDayLabel={weddingDayLabel} giftsEnabled={giftsEnabled} />
         ) : (
           <p className={styles.noInvite}>
             Para confirmar a sua presença, abra o link pessoal que recebeu dos noivos.
@@ -35,7 +36,15 @@ export function RsvpSection({ invite, weddingDayLabel }: RsvpSectionProps) {
   );
 }
 
-function RsvpForm({ invite, weddingDayLabel }: { invite: GuestInvite; weddingDayLabel: string }) {
+function RsvpForm({
+  invite,
+  weddingDayLabel,
+  giftsEnabled,
+}: {
+  invite: GuestInvite;
+  weddingDayLabel: string;
+  giftsEnabled: boolean;
+}) {
   const people = invite.people;
   const alreadyAnswered = people.every((p) => p.attendance !== "");
 
@@ -86,10 +95,12 @@ function RsvpForm({ invite, weddingDayLabel }: { invite: GuestInvite; weddingDay
             <span className={styles.tableCardName}>{tableName}</span>
           </div>
         )}
-        <a href="#gifts" className={styles.pillDark} style={{ minHeight: 52, padding: "0 26px", fontSize: 12, letterSpacing: 2 }}>
-          <GiftIcon size={18} />
-          Escolher um presente
-        </a>
+        {giftsEnabled && (
+          <a href="#gifts" className={styles.pillDark} style={{ minHeight: 52, padding: "0 26px", fontSize: 12, letterSpacing: 2 }}>
+            <GiftIcon size={18} />
+            Escolher um presente
+          </a>
+        )}
         <button type="button" className={styles.pillOutline} style={{ minHeight: 44, letterSpacing: 2 }} onClick={() => setSent(false)}>
           Alterar resposta
         </button>
@@ -163,11 +174,13 @@ function RsvpForm({ invite, weddingDayLabel }: { invite: GuestInvite; weddingDay
         {pending ? "A enviar…" : "Confirmar presença"}
       </button>
 
-      <a href="#gifts" className={styles.linkCard}>
-        <GiftIcon size={20} stroke="var(--bronze)" />
-        <span className={styles.linkCardText}>Ver a lista de presentes</span>
-        <ChevronRight size={16} />
-      </a>
+      {giftsEnabled && (
+        <a href="#gifts" className={styles.linkCard}>
+          <GiftIcon size={20} stroke="var(--bronze)" />
+          <span className={styles.linkCardText}>Ver a lista de presentes</span>
+          <ChevronRight size={16} />
+        </a>
+      )}
     </form>
   );
 }

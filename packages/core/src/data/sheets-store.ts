@@ -1,6 +1,7 @@
 import "server-only";
 import { auth, sheets, type sheets_v4 } from "@googleapis/sheets";
 import { wedding } from "../wedding";
+import { EVENT_FIELDS, eventFromTexts, eventValueToText, type EventSettings } from "../event";
 import { personalLink } from "../site";
 import { defaultInviteLabel, newId, nowStamp } from "./invite-helpers";
 import {
@@ -21,6 +22,7 @@ import {
  *  - "Convidados": one row per person. Rows sharing an invite ID form one personal invite.
  *  - "Presentes":  the gift list and who reserved each gift.
  *  - "Mesas":      seating tables, with formulas showing who sits where.
+ *  - "Evento":     the event details (names, date, venue, photos…) edited on the admin app.
  *
  * The couple can edit the sheet by hand; the app re-reads it on every request.
  */
@@ -29,12 +31,14 @@ const SHEET = {
   guests: "Convidados",
   gifts: "Presentes",
   tables: "Mesas",
+  event: "Evento",
 } as const;
 
 const HEADERS = {
   guests: ["Convite ID", "Nome do convite", "Pessoa", "Link pessoal", "Mesa", "Telefone", "Enviado", "Aberto", "Resposta", "Mensagem"],
   gifts: ["ID", "Presente", "Categoria", "Estado", "Reservado por", "Convite ID", "Data"],
   tables: ["N.º", "Nome da mesa", "Lugares", "Ocupados", "Quem está sentado"],
+  event: ["Chave", "Campo", "Valor"],
 } as const;
 
 const ATTENDANCE_TEXT: Record<Attendance, string> = { yes: "Vem", no: "Não vem", "": "Por responder" };
@@ -72,7 +76,7 @@ const CACHE_TTL_MS = 15_000;
 
 type TabKey = keyof typeof SHEET;
 type Snapshot = Record<TabKey, string[][]>;
-const RANGES: Record<TabKey, string> = { guests: "A2:J", gifts: "A2:G", tables: "A2:C" };
+const RANGES: Record<TabKey, string> = { guests: "A2:J", gifts: "A2:G", tables: "A2:C", event: "A2:C" };
 
 interface GuestRow {
   rowNumber: number;
@@ -175,6 +179,14 @@ export class SheetsStore implements WeddingStore {
         data: missing.map((key) => ({ range: `${SHEET[key]}!A1`, values: [[...HEADERS[key]]] })),
       },
     });
+
+    if (missing.includes("event")) {
+      const defaults = eventFromTexts({});
+      await this.appendRows(
+        SHEET.event,
+        EVENT_FIELDS.map(({ key, label }) => [key, label, eventValueToText(key, defaults)]),
+      );
+    }
 
     if (missing.includes("tables")) {
       await this.appendRows(
@@ -470,6 +482,43 @@ export class SheetsStore implements WeddingStore {
     return exclusive(async () => {
       const found = (await this.readGiftRows(true)).find(({ gift }) => gift.id === giftId);
       if (found) await this.deleteRow(SHEET.gifts, found.rowNumber);
+    });
+  }
+
+  // ---------------------------------------------------------------- event
+
+  private async readEventRows(fresh = false): Promise<Map<string, { value: string; rowNumber: number }>> {
+    const rows = await this.readRows("event", fresh);
+    const byKey = new Map<string, { value: string; rowNumber: number }>();
+    rows.forEach((values, i) => {
+      const key = cell(values, 0);
+      if (key) byKey.set(key, { value: (values[2] ?? "").toString(), rowNumber: i + 2 });
+    });
+    return byKey;
+  }
+
+  async getEvent() {
+    const rows = await this.readEventRows();
+    return eventFromTexts(Object.fromEntries(Array.from(rows, ([key, { value }]) => [key, value])));
+  }
+
+  updateEvent(patch: Partial<EventSettings>) {
+    return exclusive(async () => {
+      const rows = await this.readEventRows(true);
+      const current = eventFromTexts(Object.fromEntries(Array.from(rows, ([key, { value }]) => [key, value])));
+      const next: EventSettings = { ...current, ...patch };
+      const changed = EVENT_FIELDS.filter(({ key }) => key in patch);
+      await this.writeRanges(
+        changed.flatMap(({ key }) => {
+          const row = rows.get(key);
+          return row ? [{ range: `${SHEET.event}!C${row.rowNumber}`, values: [[eventValueToText(key, next)]] }] : [];
+        }),
+      );
+      const missingRows = changed.filter(({ key }) => !rows.has(key));
+      if (missingRows.length > 0) {
+        await this.appendRows(SHEET.event, missingRows.map(({ key, label }) => [key, label, eventValueToText(key, next)]));
+      }
+      return next;
     });
   }
 

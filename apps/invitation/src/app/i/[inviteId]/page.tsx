@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
-import { coupleNames, wedding } from "@wedding/core/wedding";
+import { wedding } from "@wedding/core/wedding";
+import { coupleNamesOf } from "@wedding/core/event";
 import { Invitation } from "@/components/invitation/Invitation";
 import { nowStamp } from "@wedding/core/data/invite-helpers";
 import { getStore } from "@wedding/core/data/store";
@@ -15,9 +16,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { inviteId } = await params;
-  const invite = await getStore().getInvite(inviteId);
+  const [invite, event] = await Promise.all([getStore().getInvite(inviteId), getStore().getEvent()]);
+  const couple = coupleNamesOf(event);
   return {
-    title: invite ? `Para ${invite.label} · ${coupleNames}` : coupleNames,
+    title: invite ? `Para ${invite.label} · ${couple}` : couple,
     robots: { index: false, follow: false },
   };
 }
@@ -26,10 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PersonalInvitePage({ params }: PageProps) {
   const { inviteId } = await params;
   const store = getStore();
-  const [invite, tables, gifts] = await Promise.all([
+  const [invite, tables, gifts, event] = await Promise.all([
     store.getInvite(inviteId),
     store.listTables(),
     store.listGifts(),
+    store.getEvent(),
   ]);
   if (!invite) notFound();
 
@@ -38,5 +41,11 @@ export default async function PersonalInvitePage({ params }: PageProps) {
     after(() => store.updateInvite(invite.id, { openedAt: nowStamp(wedding.timeZone) }));
   }
 
-  return <Invitation invite={toGuestInvite(invite, tables)} gifts={toGuestGifts(gifts, invite.id)} />;
+  return (
+    <Invitation
+      event={event}
+      invite={toGuestInvite(invite, tables)}
+      gifts={event.giftsEnabled ? toGuestGifts(gifts, invite.id) : []}
+    />
+  );
 }

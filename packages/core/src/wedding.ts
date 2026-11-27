@@ -1,7 +1,7 @@
 /**
- * All wedding content lives here. Edit these values to personalise the invitation.
+ * First-run defaults. The couple edits all of this on the admin app ("Evento"), which saves it in
+ * the Google Sheet; these values are only used until then (and in demo mode).
  * Guest-facing copy is in Portuguese (as in the design); code identifiers are in English.
- * Values in [brackets] are placeholders still to be filled in.
  */
 
 export const wedding = {
@@ -12,7 +12,6 @@ export const wedding = {
   /** Local date and time of the ceremony (ISO 8601, venue time zone). */
   ceremonyStart: "2027-02-13T15:00:00+02:00",
   timeZone: "Africa/Maputo",
-  weekdayLabel: "Sábado",
   cityLabel: "Matola",
   rsvpDeadlineLabel: "Responda até 15 de janeiro de 2027",
 
@@ -24,12 +23,7 @@ export const wedding = {
   song: {
     title: "[Título da nossa música]",
     artist: "[Artista]",
-    /** Put the audio file in /public/music and point to it here. */
-    src: "/music/our-song.mp3",
   },
-
-  /** Full-screen cover photo in /public/photos. Leave empty to show a placeholder. */
-  coverPhoto: "",
 
   invitationText:
     "É com grande alegria que vos convidamos para a cerimónia do nosso casamento. Venham celebrar connosco esta nova etapa das nossas vidas.",
@@ -59,13 +53,6 @@ export const wedding = {
   gallery: {
     quote:
       "“[Uma frase curta sobre a vossa história — como se conheceram, ou o local da sessão.]”",
-    /** Photo paths in /public/photos. Empty entries show a placeholder tile. */
-    photos: Array.from({ length: 17 }, () => ""),
-  },
-
-  gifts: {
-    mobileMoneyLabel: "M-Pesa",
-    mobileMoneyNumber: "[+258 8X XXX XXXX]",
   },
 
   /** Default tables created the first time the Google Sheet is initialised. */
@@ -84,6 +71,3 @@ export const wedding = {
   defaultTableCapacity: 10,
 } as const;
 
-export type ScheduleIcon = (typeof wedding.schedule)[number]["icon"];
-
-export const coupleNames = `${wedding.bride} & ${wedding.groom}`;

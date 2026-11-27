@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { wedding } from "@wedding/core/wedding";
 import { ChevronLeft, ChevronRight, CloseIcon } from "@wedding/core/icons";
 import styles from "./invitation.module.css";
 
-const photos: readonly string[] = wedding.gallery.photos;
 const tileTones = ["", styles.placeholderDark, "", styles.placeholderGold, styles.placeholderDark];
 
-function Photo({ index, tone }: { index: number; tone?: string }) {
+function Photo({ photos, index, tone }: { photos: string[]; index: number; tone?: string }) {
   const src = photos[index];
   if (src) {
     // eslint-disable-next-line @next/next/no-img-element
@@ -22,7 +20,7 @@ function Photo({ index, tone }: { index: number; tone?: string }) {
 }
 
 /** 6 · Pre-wedding photo session: five-tile mosaic and a full-screen lightbox. */
-export function GallerySection() {
+export function GallerySection({ photos, quote }: { photos: string[]; quote: string }) {
   const [index, setIndex] = useState(-1);
   const total = photos.length;
   const open = index >= 0;
@@ -69,7 +67,7 @@ export function GallerySection() {
                 onClick={() => setIndex(i)}
                 aria-label={isMore ? `Abrir foto ${i + 1} e ver todas` : `Abrir foto ${i + 1}`}
               >
-                <Photo index={i} tone={tileTones[i]} />
+                <Photo photos={photos} index={i} tone={tileTones[i]} />
                 {isMore && (
                   <span className={styles.tileMoreOverlay}>
                     <span className={styles.tileMoreCount}>+{extra}</span>
@@ -81,7 +79,7 @@ export function GallerySection() {
           })}
         </div>
 
-        <p className={styles.galleryQuote}>{wedding.gallery.quote}</p>
+        {quote && <p className={styles.galleryQuote}>{quote}</p>}
       </div>
 
       {open && (
@@ -106,7 +104,7 @@ export function GallerySection() {
             }}
           >
             {photos[index] ? (
-              <Photo index={index} />
+              <Photo photos={photos} index={index} />
             ) : (
               <span className={`${styles.placeholder} ${styles.placeholderDark}`} style={{ width: "100%", height: "100%", fontSize: 11, letterSpacing: 2 }}>
                 Foto {index + 1} · deslize

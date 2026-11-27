@@ -1,8 +1,12 @@
-import { coupleNames, wedding } from "@wedding/core/wedding";
+import { ceremonyStart, coupleNamesOf } from "@wedding/core/event";
+import { getStore } from "@wedding/core/data/store";
+
+export const dynamic = "force-dynamic";
 
 /** Downloads an .ics file so guests can add the wedding to their calendar. */
-export function GET() {
-  const start = new Date(wedding.ceremonyStart);
+export async function GET() {
+  const event = await getStore().getEvent();
+  const start = new Date(ceremonyStart(event));
   const end = new Date(start.getTime() + 9 * 60 * 60 * 1000); // until the end of the party
   const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const escape = (text: string) => text.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
@@ -18,9 +22,9 @@ export function GET() {
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(start)}`,
     `DTEND:${stamp(end)}`,
-    `SUMMARY:${escape(`Casamento de ${coupleNames}`)}`,
-    `LOCATION:${escape(wedding.venue.mapQuery)}`,
-    `DESCRIPTION:${escape(wedding.schedule.map((s) => `${s.time} ${s.label}`).join("\n"))}`,
+    `SUMMARY:${escape(`Casamento de ${coupleNamesOf(event)}`)}`,
+    `LOCATION:${escape(event.mapQuery || event.venueAddress || event.venueName)}`,
+    `DESCRIPTION:${escape(event.schedule.map((s) => `${s.time} ${s.label}`).join("\n"))}`,
     "END:VEVENT",
     "END:VCALENDAR",
     "",

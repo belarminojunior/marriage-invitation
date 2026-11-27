@@ -1,4 +1,4 @@
-import { wedding, type ScheduleIcon } from "@wedding/core/wedding";
+import type { EventSettings, ScheduleIcon } from "@wedding/core/event";
 import { HeartSolid } from "@wedding/core/icons";
 import styles from "./invitation.module.css";
 
@@ -53,18 +53,18 @@ function MomentIcon({ icon }: { icon: ScheduleIcon }) {
 }
 
 /** 3 · Invitation text and the programme of the day. */
-export function ProgramSection() {
+export function ProgramSection({ event }: { event: EventSettings }) {
   return (
     <section className={`${styles.section} ${styles.glowTopLeft}`}>
       <div className={`${styles.column} ${styles.program}`}>
         <h2 className={styles.programTitle}>Convite especial</h2>
-        <p className={styles.programIntro}>{wedding.invitationText}</p>
+        <p className={styles.programIntro}>{event.invitationText}</p>
 
         <div className={styles.programBadge}>Programa</div>
 
         <ol className={styles.timeline}>
-          {wedding.schedule.map((item) => (
-            <li key={item.label} className={styles.timelineItem}>
+          {event.schedule.map((item, i) => (
+            <li key={i} className={styles.timelineItem}>
               <MomentIcon icon={item.icon} />
               <span className={styles.timelineHeart}>
                 <HeartSolid size={20} color="var(--ink)" />
@@ -75,10 +75,12 @@ export function ProgramSection() {
           ))}
         </ol>
 
-        <div className={styles.verse}>
-          <p className={styles.verseText}>{wedding.verse.text}</p>
-          <p className={styles.verseRef}>{wedding.verse.reference}</p>
-        </div>
+        {event.verseText && (
+          <div className={styles.verse}>
+            <p className={styles.verseText}>{event.verseText}</p>
+            <p className={styles.verseRef}>{event.verseReference}</p>
+          </div>
+        )}
       </div>
     </section>
   );

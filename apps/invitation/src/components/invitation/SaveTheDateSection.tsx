@@ -1,11 +1,11 @@
-import { wedding } from "@wedding/core/wedding";
+import type { EventSettings } from "@wedding/core/event";
 import { CalendarPlusIcon, PinIcon } from "@wedding/core/icons";
 import { WEEKDAYS_PT, weddingDateDots, weddingMonth } from "@wedding/core/wedding-date";
 import styles from "./invitation.module.css";
 
 /** 2 · Save the date: monogram and month calendar with the day circled by a heart. */
-export function SaveTheDateSection() {
-  const { title, cells } = weddingMonth();
+export function SaveTheDateSection({ event }: { event: EventSettings }) {
+  const { title, cells } = weddingMonth(event.date);
 
   return (
     <section id="save-the-date" className={`${styles.section} ${styles.glowTopLeft}`}>
@@ -17,11 +17,11 @@ export function SaveTheDateSection() {
         </p>
 
         <div className={styles.monogram} aria-hidden="true">
-          <span className={styles.monogramLetters}>{wedding.monogram}</span>
+          <span className={styles.monogramLetters}>{event.monogram}</span>
           <span className={styles.monogramNames}>
-            <span>{wedding.bride}</span>
+            <span>{event.bride}</span>
             <span className={styles.plus}>+</span>
-            <span>{wedding.groom}</span>
+            <span>{event.groom}</span>
           </span>
         </div>
 
@@ -56,10 +56,10 @@ export function SaveTheDateSection() {
         </div>
 
         <div className={styles.saveFooter}>
-          <p className={styles.dateLine}>{weddingDateDots()}</p>
+          <p className={styles.dateLine}>{weddingDateDots(event.date)}</p>
           <p className={styles.place}>
             <PinIcon size={14} />
-            {wedding.venue.shortAddress}
+            {event.venueShortAddress}
           </p>
           <a href="/api/calendar" className={styles.pillDark} style={{ marginTop: 6, minHeight: 44, fontSize: 11, letterSpacing: 2 }}>
             <CalendarPlusIcon size={15} />

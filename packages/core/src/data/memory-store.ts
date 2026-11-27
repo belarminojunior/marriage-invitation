@@ -1,4 +1,5 @@
 import { wedding } from "../wedding";
+import { defaultEvent, type EventSettings } from "../event";
 import { defaultInviteLabel, newId, nowStamp } from "./invite-helpers";
 import {
   GiftTakenError,
@@ -15,6 +16,7 @@ import {
  * Data is seeded with sample guests and resets when the server restarts.
  */
 interface MemoryData {
+  event: EventSettings;
   invites: Invite[];
   gifts: Gift[];
   tables: SeatingTable[];
@@ -42,6 +44,7 @@ function seed(): MemoryData {
   });
 
   return {
+    event: { ...defaultEvent(), giftsEnabled: true },
     invites: [
       invite("a7k2", [["Convidado 01", "yes"], ["Acompanhante 01", "yes"]], {
         tableNumber: 1, sentAt: "2026-11-20 10:00", openedAt: "2026-11-20 12:10",
@@ -168,6 +171,15 @@ export class MemoryStore implements WeddingStore {
 
   async removeGift(giftId: string) {
     data().gifts = data().gifts.filter((g) => g.id !== giftId);
+  }
+
+  async getEvent() {
+    return clone(data().event);
+  }
+
+  async updateEvent(patch: Partial<EventSettings>) {
+    data().event = { ...data().event, ...patch };
+    return clone(data().event);
   }
 
   async listTables() {

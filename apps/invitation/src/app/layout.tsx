@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Cormorant_Garamond, Montserrat, Pinyon_Script } from "next/font/google";
-import { coupleNames } from "@wedding/core/wedding";
+import { coupleNamesOf } from "@wedding/core/event";
+import { getStore } from "@wedding/core/data/store";
 import "@wedding/core/styles/base.css";
 
 const script = Pinyon_Script({ weight: "400", subsets: ["latin"], variable: "--font-script" });
@@ -13,10 +14,13 @@ const verse = Cormorant_Garamond({
   variable: "--font-verse",
 });
 
-export const metadata: Metadata = {
-  title: `${coupleNames} · Convite de casamento`,
-  description: `Convite digital para o casamento de ${coupleNames}.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const couple = coupleNamesOf(await getStore().getEvent());
+  return {
+    title: `${couple} · Convite de casamento`,
+    description: `Convite digital para o casamento de ${couple}.`,
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#1B1A18",

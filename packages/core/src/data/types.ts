@@ -1,3 +1,5 @@
+import type { EventSettings } from "../event";
+
 export type Attendance = "yes" | "no" | "";
 
 export interface InvitePerson {
@@ -62,6 +64,10 @@ export interface WeddingStore {
   releaseGift(giftId: string): Promise<void>;
   renameGift(giftId: string, title: string): Promise<void>;
   removeGift(giftId: string): Promise<void>;
+
+  /** The event details the couple fills in on the admin app ("Evento" tab of the sheet). */
+  getEvent(): Promise<EventSettings>;
+  updateEvent(patch: Partial<EventSettings>): Promise<EventSettings>;
 
   listTables(): Promise<SeatingTable[]>;
   addTable(name: string, capacity: number): Promise<SeatingTable>;

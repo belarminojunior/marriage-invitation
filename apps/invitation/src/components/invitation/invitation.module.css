@@ -1256,17 +1256,7 @@
   color: var(--text-soft);
 }
 
-.giftsMoney {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-muted);
-}
 
-.giftsMoney strong {
-  font-weight: 600;
-  color: var(--ink);
-}
 
 .giftsProgress {
   display: flex;

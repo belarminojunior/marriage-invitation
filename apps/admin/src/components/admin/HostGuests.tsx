@@ -2,7 +2,6 @@
 
 import { useOptimistic, useState, useTransition, type FormEvent } from "react";
 import { createInvite, markInviteSent, setInviteTable } from "@/app/actions/admin";
-import { coupleNames } from "@wedding/core/wedding";
 import { CopyIcon, PlusIcon, SendIcon } from "@wedding/core/icons";
 import type { InviteStatus } from "@wedding/core/data/types";
 import { HostHeader, useToast } from "./HostChrome";
@@ -30,13 +29,23 @@ const FILTERS: { key: Filter; label: string; match: (r: HostInviteRow) => boolea
 
 type Change = { id: string; patch: Partial<HostInviteRow> };
 
-function whatsappUrl(row: HostInviteRow) {
+function whatsappUrl(row: HostInviteRow, coupleNames: string) {
   const text = `Olá ${row.label}! Com muita alegria convidamos-vos para o casamento de ${coupleNames}. Este é o vosso convite pessoal: ${row.link}`;
   const phone = row.phone.replace(/\D/g, "");
   return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
 
-export function HostGuests({ invites, tables, sheetUrl }: { invites: HostInviteRow[]; tables: HostTableRow[]; sheetUrl: string | null }) {
+export function HostGuests({
+  invites,
+  tables,
+  sheetUrl,
+  coupleNames,
+}: {
+  invites: HostInviteRow[];
+  tables: HostTableRow[];
+  sheetUrl: string | null;
+  coupleNames: string;
+}) {
   const [rows, applyChange] = useOptimistic(invites, (current, change: Change) =>
     current.map((r) => (r.id === change.id ? { ...r, ...change.patch } : r)),
   );
@@ -88,7 +97,7 @@ export function HostGuests({ invites, tables, sheetUrl }: { invites: HostInviteR
   };
 
   const onSend = (row: HostInviteRow) => {
-    window.open(whatsappUrl(row), "_blank", "noopener,noreferrer");
+    window.open(whatsappUrl(row, coupleNames), "_blank", "noopener,noreferrer");
     show(`A abrir o WhatsApp para ${row.people[0]}…`);
     if (row.status === "new") {
       startTransition(async () => {

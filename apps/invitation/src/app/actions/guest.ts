@@ -38,8 +38,9 @@ export async function submitRsvp(
 
 export async function reserveGift(inviteId: string, giftId: string): Promise<ActionResult> {
   const store = getStore();
-  const invite = await store.getInvite(inviteId);
+  const [invite, event] = await Promise.all([store.getInvite(inviteId), store.getEvent()]);
   if (!invite) return { ok: false, error: "Convite não encontrado." };
+  if (!event.giftsEnabled) return { ok: false, error: "A lista de presentes não está disponível." };
 
   try {
     await store.reserveGift(giftId, inviteId, invite.label);

@@ -2,7 +2,6 @@
 
 import { useState, useTransition, type FormEvent } from "react";
 import { reserveGift } from "@/app/actions/guest";
-import { wedding } from "@wedding/core/wedding";
 import { CheckIcon, ChevronLeft, LockIcon } from "@wedding/core/icons";
 import type { GuestGift, GuestInvite } from "./types";
 import styles from "./invitation.module.css";
@@ -61,9 +60,6 @@ export function GiftsSection({ invite, gifts: initialGifts }: GiftsSectionProps)
           <h2 className={styles.programTitle}>Lista de presentes</h2>
           <p className={styles.giftsIntro}>
             Escolha um presente e ele fica reservado em seu nome — mais ninguém o pode escolher.
-          </p>
-          <p className={styles.giftsMoney}>
-            Prefere oferecer em dinheiro? {wedding.gifts.mobileMoneyLabel} <strong>{wedding.gifts.mobileMoneyNumber}</strong>
           </p>
         </div>
 

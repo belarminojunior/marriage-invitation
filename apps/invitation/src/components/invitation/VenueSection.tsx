@@ -1,18 +1,18 @@
-import { wedding } from "@wedding/core/wedding";
+import { ceremonyStart, type EventSettings } from "@wedding/core/event";
 import { CarIcon, NavigateIcon, PinIcon } from "@wedding/core/icons";
 import { Countdown } from "./Countdown";
 import styles from "./invitation.module.css";
 
 /** 4 · Countdown to the ceremony, venue map and directions. */
-export function VenueSection() {
-  const query = encodeURIComponent(wedding.venue.mapQuery);
+export function VenueSection({ event }: { event: EventSettings }) {
+  const query = encodeURIComponent(event.mapQuery || event.venueAddress || event.venueName);
 
   return (
     <section className={styles.section}>
       <div className={styles.countdown}>
         <div className={styles.countdownInner}>
           <h2 className={styles.countdownTitle}>Faltam poucos dias</h2>
-          <Countdown target={wedding.ceremonyStart} />
+          <Countdown target={ceremonyStart(event)} />
           <p className={styles.countdownCaption}>até ao nosso “sim”</p>
         </div>
       </div>
@@ -20,13 +20,13 @@ export function VenueSection() {
       <div className={styles.venue}>
         <div className={styles.venueHeader}>
           <p className={styles.eyebrow}>Onde</p>
-          <h3 className={styles.venueName}>{wedding.venue.name}</h3>
-          <p className={styles.venueAddress}>{wedding.venue.address}</p>
+          <h3 className={styles.venueName}>{event.venueName}</h3>
+          <p className={styles.venueAddress}>{event.venueAddress}</p>
         </div>
 
         <div className={styles.map}>
           <iframe
-            title={`Mapa: ${wedding.venue.name}`}
+            title={`Mapa: ${event.venueName}`}
             src={`https://www.google.com/maps?q=${query}&output=embed`}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
@@ -54,10 +54,12 @@ export function VenueSection() {
           </a>
         </div>
 
-        <div className={styles.note}>
-          <CarIcon size={22} />
-          <p>{wedding.venue.parkingNote}</p>
-        </div>
+        {event.parkingNote && (
+          <div className={styles.note}>
+            <CarIcon size={22} />
+            <p>{event.parkingNote}</p>
+          </div>
+        )}
       </div>
     </section>
   );
